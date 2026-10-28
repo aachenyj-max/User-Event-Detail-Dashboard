@@ -44,6 +44,16 @@ body[data-page="session"] .detail-hover-guide{stroke:#526b96;stroke-width:.7;str
 /* Session summary: show the three milk volumes together and give both flow values equal emphasis. */
 body[data-page="session"] .metric-strip{grid-template-columns:max-content minmax(165px,1.1fr) repeat(2,minmax(235px,1.62fr)) minmax(125px,.86fr) repeat(3,minmax(125px,.86fr));overflow-x:auto}
 body[data-page="session"] .metric-volume{padding-right:14px}
+
+/* User list pagination lives beside the list summary. */
+body[data-page="users"] .users-heading{justify-content:space-between;gap:16px}
+body[data-page="users"] .users-heading-copy{display:flex;align-items:center;gap:17px;min-width:0;flex:1}
+body[data-page="users"] .users-heading-copy h2{flex:none}
+body[data-page="users"] #user-count{min-width:0;line-height:1.4;overflow-wrap:anywhere}
+body[data-page="users"] .users-heading-actions{display:flex;align-items:center;gap:8px;flex:none;margin-left:auto}
+body[data-page="users"] .users-heading-actions .outline-btn{height:32px;padding:0 11px;font-weight:500;color:#425778}
+body[data-page="users"] .users-heading-actions .outline-btn:disabled{opacity:.45;cursor:default}
+body[data-page="users"] .users-heading-actions .refresh-users{color:#0756ff;border-color:#bdd1ff}
 body[data-page="session"] .metric-content{min-width:0;display:block}
 body[data-page="session"] .metric-values{display:flex;align-items:baseline;gap:7px;white-space:nowrap}
 body[data-page="session"] .metric-values>span{display:inline-flex;align-items:baseline;gap:3px;color:#526991;font-size:11px;font-weight:600}
@@ -72,6 +82,11 @@ body[data-page="session"] .event-type.is-anomaly:before{color:#ed3e4e}
 body[data-page="session"] .event-side mark.leak-severe{background:#ffe5e7;color:#da2539}
 body[data-page="track"] .session-filters{gap:8px;flex-wrap:wrap;justify-content:flex-end}
 body[data-page="track"] .session-filters select{min-width:96px}
+
+.more-filter{display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.more-filter-chevron{display:block;flex:0 0 16px;width:16px;height:16px;transition:transform .18s ease}
+.more-filter[aria-expanded="true"] .more-filter-chevron{transform:rotate(180deg)}
+.sync-point{position:absolute;z-index:3;width:7px;height:7px;border:1px solid #fff;border-radius:50%;box-shadow:0 0 0 1px #ffffff80;transform:translate(-50%,-50%);pointer-events:none}
 body[data-page="track"] .session-export{height:34px;padding:0 13px;white-space:nowrap;font-size:12px}
 body[data-page="track"] .session-select-cell{padding-left:8px;padding-right:4px;text-align:center}
 body[data-page="track"] .session-select-cell input{width:15px;height:15px;accent-color:#245eff;cursor:pointer;vertical-align:middle}
