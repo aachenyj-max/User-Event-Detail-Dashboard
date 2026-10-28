@@ -133,6 +133,7 @@
         q('.chart-range',panel).title=`当前显示 ${rows.length} 条 Session`;
         q('.sync-crosshair',panel)?.classList.add('hidden');
         q('.sync-chart-tip',panel)?.classList.add('hidden');
+        qa('.sync-point',panel).forEach(point=>point.classList.add('hidden'));
       });
     };
     window.momcozyRefreshTrackCharts=refresh;
@@ -165,12 +166,30 @@
     const max=Math.max(type==='milk'?200:type==='duration'?30:15,Math.ceil(peak/step)*step);
     const x=index=>rows.length<2?L+plotW/2:L+index*plotW/(rows.length-1);
     const y=value=>T+plotH-value/max*plotH;
-    let svg=`<svg class="mini-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" data-mini="${type}" data-points="${rows.length}">`;
+    let svg=`<svg class="mini-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" data-mini="${type}" data-points="${rows.length}" data-max="${max}">`;
     for(let i=0;i<5;i++){const gridY=T+i*plotH/4;svg+=`<line x1="${L}" y1="${gridY}" x2="${W-R}" y2="${gridY}" stroke="#eaf0fb"/><text x="${L-12}" y="${gridY+4}" text-anchor="end" fill="#6680b1" font-size="10">${Math.round(max-i*max/4)}</text>`}
     if(!rows.length)return svg+`<text x="${W/2}" y="${T+plotH/2}" text-anchor="middle" fill="#8294b5" font-size="14">当前时间范围暂无 Session</text></svg>`;
     const labelStep=Math.max(1,Math.ceil(rows.length/7));
     rows.forEach((row,index)=>{if(index%labelStep)return;const started=row[0];svg+=`<text x="${x(index)}" y="${H-17}" text-anchor="middle" fill="#5874aa" font-size="9"><tspan x="${x(index)}">${started.slice(5,10).replace('-', '/')}</tspan><tspan x="${x(index)}" dy="10">${started.slice(11,16)}</tspan></text>`});
-    const line=(values,color)=>{svg+=`<polyline points="${values.map((value,index)=>`${x(index)},${y(value)}`).join(' ')}" fill="none" stroke="${color}" stroke-width="2"/>`;values.forEach((value,index)=>svg+=`<circle cx="${x(index)}" cy="${y(value)}" r="3" fill="${color}" stroke="white"/>`)};
+    const line=(values,color)=>{
+      const points=values.map((value,index)=>({x:x(index),y:y(value)}));
+      let path=`M ${points[0].x} ${points[0].y}`;
+      if(points.length>1){
+        const slopes=points.slice(1).map((point,index)=>(point.y-points[index].y)/(point.x-points[index].x));
+        const tangents=points.map((_,index)=>{
+          if(index===0)return slopes[0];
+          if(index===points.length-1)return slopes.at(-1);
+          const before=slopes[index-1],after=slopes[index];
+          return before*after<=0?0:2*before*after/(before+after);
+        });
+        points.slice(1).forEach((point,index)=>{
+          const previous=points[index],third=(point.x-previous.x)/3;
+          path+=` C ${previous.x+third} ${previous.y+tangents[index]*third} ${point.x-third} ${point.y-tangents[index+1]*third} ${point.x} ${point.y}`;
+        });
+      }
+      svg+=`<path d="${path}" fill="none" stroke="${color}" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>`;
+      if(rows.length<=20)points.forEach(point=>svg+=`<circle cx="${point.x}" cy="${point.y}" r="1.8" fill="${color}" stroke="white" stroke-width=".5"/>`);
+    };
     if(type==='milk'){if(side==='total'||side==='left')line(series[1],'#0756ff');if(side==='total'||side==='right')line(series[2],'#6c23ff');if(side==='total')line(series[0],'#f52ed5')}
     else if(type==='duration')line(series[0],'#6a23ff');
     else{const barWidth=Math.min(14,Math.max(4,plotW/rows.length*.42));series[0].forEach((value,index)=>svg+=`<rect x="${x(index)-barWidth/2}" y="${y(value)}" width="${barWidth}" height="${T+plotH-y(value)}" rx="3" fill="#85b6ff"/>`);line(series[1],'#7425ff')}
@@ -195,8 +214,8 @@
   function initSyncedChartHover(){
     if(document.body.dataset.page!=='track')return;
     const panels=qa('.chart-grid .chart-panel');
-    panels.forEach(panel=>{const cross=document.createElement('div'),tip=document.createElement('div');cross.className='sync-crosshair hidden';tip.className='sync-chart-tip hidden';tip.setAttribute('role','status');panel.append(cross,tip)});
-    const hide=()=>panels.forEach(panel=>{q('.sync-crosshair',panel).classList.add('hidden');q('.sync-chart-tip',panel).classList.add('hidden')});
+    panels.forEach(panel=>{const cross=document.createElement('div'),tip=document.createElement('div');cross.className='sync-crosshair hidden';tip.className='sync-chart-tip hidden';tip.setAttribute('role','status');panel.append(cross,tip);for(let i=0;i<3;i++){const point=document.createElement('span');point.className='sync-point hidden';panel.append(point)}});
+    const hide=()=>panels.forEach(panel=>{q('.sync-crosshair',panel).classList.add('hidden');q('.sync-chart-tip',panel).classList.add('hidden');qa('.sync-point',panel).forEach(point=>point.classList.add('hidden'))});
     const tipRows=items=>items.map(([color,label,value])=>`<div class="sync-tip-row"><i style="background:${color}"></i><span>${label}</span><b>${value}</b></div>`).join('');
     function pointIndex(event,panel){
       const svg=event.target.closest?.('svg[data-mini]'),rows=panel.chartRows||[];
@@ -211,14 +230,26 @@
       panels.forEach(panel=>{
         const svg=q('svg[data-mini]',panel),type=svg?.dataset.mini,tip=q('.sync-chart-tip',panel),cross=q('.sync-crosshair',panel);
         const rows=panel.chartRows||[],local=rows.indexOf(row);
-        if(!svg||local<0){tip.classList.add('hidden');cross.classList.add('hidden');return}
+        if(!svg||local<0){tip.classList.add('hidden');cross.classList.add('hidden');qa('.sync-point',panel).forEach(point=>point.classList.add('hidden'));return}
         const svgRect=svg.getBoundingClientRect(),panelRect=panel.getBoundingClientRect();
         const plotX=rows.length===1?43+407/2:43+local/(rows.length-1)*407;
         const x=svgRect.left-panelRect.left+plotX/460*svgRect.width;
         cross.style.left=`${x}px`;cross.style.top=`${svgRect.top-panelRect.top+18/180*svgRect.height}px`;cross.style.height=`${131/180*svgRect.height}px`;cross.classList.remove('hidden');
+        const durationMatch=row[4].match(/(\d+)m\s+(\d+)s/);
+        const durationValue=durationMatch?Number(durationMatch[1])+Number(durationMatch[2])/60:0;
+        const side=q('[data-milk].selected',panel)?.dataset.milk||'total';
+        const intersections=type==='milk'?(side==='left'?[['#0756ff',row[1]]]:side==='right'?[['#6c23ff',row[2]]]:[['#f52ed5',row[3]],['#0756ff',row[1]],['#6c23ff',row[2]]]):type==='duration'?[['#6a23ff',durationValue]]:[['#7425ff',row[8]]];
+        const max=Number(svg.dataset.max)||1;
+        qa('.sync-point',panel).forEach((point,index)=>{
+          const current=intersections[index];
+          if(!current){point.classList.add('hidden');return}
+          point.style.left=`${x}px`;
+          point.style.top=`${svgRect.top-panelRect.top+(18+131-current[1]/max*131)/180*svgRect.height}px`;
+          point.style.backgroundColor=current[0];
+          point.classList.remove('hidden');
+        });
         let content='';
         if(type==='milk'){
-          const side=q('[data-milk].selected',panel)?.dataset.milk||'total';
           const parts=side==='left'?[['#0756ff','左侧奶量',`${row[1]} ml`]]:side==='right'?[['#6c23ff','右侧奶量',`${row[2]} ml`]]:[['#ef2fd5','总奶量',`${row[3]} ml`],['#0756ff','左侧奶量',`${row[1]} ml`],['#6c23ff','右侧奶量',`${row[2]} ml`]];
           content=tipRows(parts);
         }else if(type==='duration')content=tipRows([['#6a23ff','时长',row[4]]]);
@@ -260,7 +291,7 @@
     q('.session-top .session-id').textContent=`Session ID: ${id}`;q('.session-header-user-id').textContent=q('.session-user strong').textContent;q('.session-header-email').textContent=q('.session-user small').textContent;
     const meta=qa('.session-meta .meta-cell');q('strong',meta[2]).textContent=start;q('strong',meta[3]).textContent=end;
     const metric=qa('.metric-strip .metric');
-    [['left',detail.left],['right',detail.right],['total',detail.total]].forEach(([side,ml])=>{q(`[data-volume="${side}"]`,metric[0]).textContent=(Number(ml)/29.5735295625).toFixed(1)});
+    [['left',detail.left],['right',detail.right],['total',detail.total]].forEach(([side,ml])=>{q(`[data-volume="${side}"]`,metric[0]).textContent=ml});
     q('strong',metric[1]).textContent=row[4];q('strong',metric[5]).textContent=detail.adjust;q('strong',metric[6]).textContent=detail.mode;
     document.body.dataset.sessionStartTime=start.replace(' ','T');
     document.title=`${sessionName} - 单次吸奶行为分析 - Momcozy 用户数据平台`;
@@ -275,7 +306,7 @@
     const pad=value=>String(value).padStart(2,'0');
     const relative=seconds=>`${pad(Math.floor(seconds/60))}:${pad(seconds%60)}`;
     const absolute=seconds=>{const date=new Date(start.getTime()+seconds*1000);return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`};
-    const interpolate=(values,fraction)=>{const exact=fraction*(values.length-1),index=Math.min(values.length-2,Math.floor(exact)),mix=exact-index;return values[index]+(values[index+1]-values[index])*mix};
+    const interpolate=(values,fraction)=>window.momcozySmoothSeriesValueAt(values,fraction);
     const level=(values,fraction)=>values[Math.min(values.length-1,Math.floor(fraction*(values.length-1)+.00001))];
     const modeAt=x=>x<320?'刺激模式':x<568?'吸乳模式':x<788?'混合模式':'吸乳模式';
     const speedAt=x=>x<260?'slow':x<470?'regular':x<680?'fast':x<820?'regular':'slow';
