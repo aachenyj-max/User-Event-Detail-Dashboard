@@ -101,6 +101,8 @@ body[data-page="users"] .event-count-filter{display:flex;align-items:center;gap:
 body[data-page="users"] .event-count-filter select{height:36px;width:58px;border:1px solid #dce6f4;border-radius:8px;background:#fff;color:#233860;padding:0 8px}
 body[data-page="users"] .event-count-filter input{width:112px}
 body[data-page="users"] .event-count-filter select:focus-visible,body[data-page="users"] .event-count-filter input:focus-visible{outline:2px solid #85a9ff;outline-offset:1px}
+body[data-page="session"] .session-meta{grid-template-columns:1.05fr .7fr 1.7fr 1.7fr .8fr .8fr 3.2fr}
+@media(max-width:1390px){body[data-page="session"] .session-meta{grid-template-columns:1fr .6fr 1.4fr 1.4fr .65fr .65fr 2.7fr}}
 .filter-panel{position:relative;z-index:5;overflow:visible}
 .filter-dropdown{position:relative;min-width:0}
 .filter-native-select{position:absolute!important;width:1px!important;height:1px!important;opacity:0;pointer-events:none}
