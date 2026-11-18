@@ -76,7 +76,7 @@ body[data-page="session"] .session-meta .meta-cell:nth-child(4) strong,
 body[data-page="session"] .session-meta .meta-cell:nth-child(5) strong,
 body[data-page="session"] .session-meta .meta-cell:nth-child(6) strong{font-weight:500}
 
-body[data-page="session"] .legend-range{display:inline-block;width:12px;height:8px;margin-right:5px;background:#cfe3ff;border:1px solid #a8c9f7;border-radius:2px}
+body[data-page="session"] .legend-range{display:inline-block;width:12px;height:8px;margin-right:5px;background:linear-gradient(to bottom,#00bd65 0 38%,#ddecff 38% 62%,#0756ff 62%);border:1px solid #a8c9f7;border-radius:2px}
 body[data-page="session"] .event-type.is-anomaly{background:#fff0f0;color:#c62535}
 body[data-page="session"] .event-type.is-anomaly:before{color:#ed3e4e}
 body[data-page="session"] .event-side mark.leak-severe{background:#ffe5e7;color:#da2539}
@@ -114,3 +114,9 @@ body[data-page="session"] .session-meta{grid-template-columns:1.05fr .7fr 1.7fr 
 .filter-dropdown.open .filter-dropdown-menu{display:block}
 .filter-dropdown-option{display:block;width:100%;padding:9px 11px;border:0;border-radius:7px;background:#fff;color:#22385f;font:inherit;text-align:left;white-space:nowrap;cursor:pointer}
 .filter-dropdown-option:hover,.filter-dropdown-option.selected{background:#edf3ff;color:#0756ff}
+
+body[data-page="track"] .kpi-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+
+body[data-page="session"] .metric-strip{grid-template-columns:max-content minmax(165px,1fr) repeat(2,minmax(235px,1.5fr)) repeat(2,minmax(190px,1.2fr)) minmax(125px,.8fr)}
+
+.session-top .session-time-badge{display:inline-block;padding:3px 5px;border-radius:4px;vertical-align:4px;font-size:13px;color:#08783c;background:#def8e8;white-space:nowrap}

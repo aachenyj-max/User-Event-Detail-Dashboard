@@ -292,7 +292,7 @@
     const meta=qa('.session-meta .meta-cell');q('strong',meta[2]).textContent=start;q('strong',meta[3]).textContent=end;
     const metric=qa('.metric-strip .metric');
     [['left',detail.left],['right',detail.right],['total',detail.total]].forEach(([side,ml])=>{q(`[data-volume="${side}"]`,metric[0]).textContent=ml});
-    q('strong',metric[1]).textContent=row[4];q('strong',metric[5]).textContent=detail.adjust;q('strong',metric[6]).textContent=detail.mode;
+    q('strong',metric[1]).textContent=row[4];
     document.body.dataset.sessionStartTime=start.replace(' ','T');
     document.title=`${sessionName} - 单次吸奶行为分析 - Momcozy 用户数据平台`;
   }
@@ -357,7 +357,7 @@
       q('[data-combined-tip]',flow).setAttribute('transform',`translate(${flowTipX},${Math.min(65,312-tipHeight)})`);
       q('[data-letdown-detail]',flow).style.display=letdown?'':'none';
       q('[data-tip-box]',flow).setAttribute('height',String(tipHeight));
-      if(letdown){setText(flow,'letdown-number',`第 ${letdown.index} / ${data.letdowns.length} 次奶阵`);setText(flow,'letdown-start',`奶阵开始　${relative(letdown.start)}`);setText(flow,'letdown-end',`奶阵结束　${relative(letdown.end)}`)}
+      if(letdown){setText(flow,'letdown-number',`第 ${letdown.index} / ${data.letdowns.length} 段奶阵（左右各 1 次）`);setText(flow,'letdown-start',`奶阵开始　${relative(letdown.start)}`);setText(flow,'letdown-end',`奶阵结束　${relative(letdown.end)}`)}
       const operationDetail=q('[data-operation-detail]',flow),anomalyDetail=q('[data-anomaly-detail]',flow);
       operationDetail.style.display=operation?'':'none';
       anomalyDetail.style.display=anomaly?'':'none';
@@ -374,7 +374,7 @@
       setField(1,'动作摘要',anomaly?`${anomaly.side}${anomaly.severity} · L${left}/R${right}`:`${event.label} · L${left}/R${right}`);
       setField(1,'模式',mode);setField(1,'韵律选择',rhythm);setField(1,'速度档位',`${speed}（左右同步）`);
       setField(1,'左侧流速',`${flowL.toFixed(2)} oz/min`);setField(1,'右侧流速',`${flowR.toFixed(2)} oz/min`);setField(1,'累计奶量',`${volumeTotal.toFixed(1)} oz`);
-      setField(1,'奶阵区间',letdown?`第 ${letdown.index} / ${data.letdowns.length} 次`:'—');
+      setField(1,'奶阵区间',letdown?`第 ${letdown.index} / ${data.letdowns.length} 段（左右各 1 次）`:'—');
       setField(1,'奶阵开始',letdown?absolute(letdown.start):'—');setField(1,'奶阵结束',letdown?absolute(letdown.end):'—');
       setField(1,'异常状态',anomaly?anomaly.severity:'正常');setField(1,'异常侧',anomaly?anomaly.side:'—');
       setField(1,'异常开始',anomaly?absolute(anomaly.start):'—');setField(1,'异常结束',anomaly?absolute(anomaly.end):'—');
