@@ -117,7 +117,7 @@
     document.addEventListener('keydown',event=>{if(event.key==='Escape')close()});
     syncTrackDate();
   }
-  function initNotices(){const button=byId('notice');if(!button)return;const update=()=>{const read=sessionStorage.getItem(noticeKey)==='1';const badge=q('b',button);badge.textContent=read?'0':'2';badge.classList.toggle('hidden',read)};button.onclick=()=>{const read=sessionStorage.getItem(noticeKey)==='1';modal(`<h2>通知</h2><div class="notice-list"><div><strong>数据同步已完成</strong><p>示例用户轨迹数据已更新至 2026-10-26。</p><a href="user-track.html">查看用户轨迹 →</a></div><div><strong>异常 Session 需关注</strong><p>发现 3 条异常记录，可查看单次行为分析。</p><a href="session-analysis.html">查看分析 →</a></div></div><button class="outline-btn" id="notice-read">${read?'已全部标记为已读':'全部标记为已读'}</button>`);byId('notice-read').onclick=()=>{sessionStorage.setItem(noticeKey,'1');update();byId('notice-read').textContent='已全部标记为已读'}};update()}
+  function initNotices(){const button=byId('notice');if(!button)return;const update=()=>{const read=sessionStorage.getItem(noticeKey)==='1';const badge=q('b',button);badge.textContent=read?'0':'2';badge.classList.toggle('hidden',read)};button.onclick=()=>{const read=sessionStorage.getItem(noticeKey)==='1';modal(`<h2>通知</h2><div class="notice-list"><div><strong>数据同步已完成</strong><p>示例用户轨迹数据已更新至 2026-10-26。</p><a href="${dashboardUrl('user-track.html')}">查看用户轨迹 →</a></div><div><strong>异常 Session 需关注</strong><p>发现 3 条异常记录，可查看单次行为分析。</p><a href="${dashboardUrl('session-analysis.html')}">查看分析 →</a></div></div><button class="outline-btn" id="notice-read">${read?'已全部标记为已读':'全部标记为已读'}</button>`);byId('notice-read').onclick=()=>{sessionStorage.setItem(noticeKey,'1');update();byId('notice-read').textContent='已全部标记为已读'}};update()}
   function initTrackCharts(){
     if(document.body.dataset.page!=='track')return;
     const panels=qa('.chart-grid .chart-panel');
@@ -267,7 +267,7 @@
         const index=pointIndex(event,panel);if(index===null)return;
         const row=sessions[index];
         sessionStorage.setItem('selectedChartSession',JSON.stringify({index,total:row[3],left:row[1],right:row[2],duration:row[4],adjust:row[6],mode:row[8]}));
-        location.href=`session-analysis.html?session=${String(index+1).padStart(2,'0')}`;
+        location.href=dashboardUrl('session-analysis.html', {session:String(index+1).padStart(2,'0')});
       });
       panel.addEventListener('pointerleave',hide);
     });
